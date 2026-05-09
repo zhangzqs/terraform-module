@@ -4,7 +4,7 @@ variable "endpoint_url" {
 }
 
 variable "bucket" {
-  description = "命令队列使用的 Kodo Bucket 名称"
+  description = "命令队列使用的 S3 bucket 名称"
   type        = string
 }
 

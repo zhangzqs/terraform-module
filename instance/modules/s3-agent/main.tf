@@ -1,8 +1,10 @@
 locals {
-  agent_script_b64 = base64encode(file("${path.module}/templates/agent.sh"))
+  s3_client_py = file("${path.module}/../shared/s3_client.py")
+  agent_py     = file("${path.module}/scripts/agent.py")
 
   rendered = templatefile("${path.module}/templates/user-data.sh", {
-    agent_script_b64  = local.agent_script_b64
+    s3_client_py      = local.s3_client_py
+    agent_py          = local.agent_py
     bucket            = var.bucket
     instance_id       = var.instance_id
     access_key_id     = var.access_key_id
