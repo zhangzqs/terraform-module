@@ -1,5 +1,5 @@
-variable "endpoint" {
-  description = "Kodo S3 兼容端点 (如 s3.cn-east-1.qiniucs.com)"
+variable "endpoint_url" {
+  description = "S3 兼容端点 URL (如 https://s3.example.com)"
   type        = string
 }
 
@@ -13,22 +13,29 @@ variable "instance_id" {
   type        = string
 }
 
-variable "ak" {
-  description = "七牛云 Access Key"
+variable "access_key_id" {
+  description = "S3 Access Key ID"
   type        = string
   sensitive   = true
 }
 
-variable "sk" {
-  description = "七牛云 Secret Key"
+variable "secret_access_key" {
+  description = "S3 Secret Access Key"
   type        = string
+  sensitive   = true
+}
+
+variable "session_token" {
+  description = "S3 Session Token（可选）"
+  type        = string
+  default     = null
   sensitive   = true
 }
 
 variable "region" {
-  description = "Kodo 区域 (如 cn-east-1)"
+  description = "S3 区域（可选）"
   type        = string
-  default     = "cn-east-1"
+  default     = null
 }
 
 variable "poll_interval" {
