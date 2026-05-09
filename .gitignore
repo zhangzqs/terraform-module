@@ -8,3 +8,5 @@ custom-plugins/
 *.auto.*
 env.sh
 *.tfvars
+__pycache__/
+*.pyc

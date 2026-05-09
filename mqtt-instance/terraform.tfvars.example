@@ -1,0 +1,4 @@
+qiniu_access_key = "replace-me"
+qiniu_secret_key = "replace-me"
+kodo_region      = "cn-east-1"
+command_bucket   = "replace-me"
