@@ -1,25 +1,40 @@
+locals {
+  cached_result = try(jsondecode(file(local.result_file)), null)
+  exec_result = local.cached_result != null ? local.cached_result : {
+    task_uuid   = random_uuid.task_uuid.result
+    exit_code   = "0"
+    output      = ""
+    executed_at = ""
+  }
+}
+
 output "result" {
   description = "完整执行结果"
-  value       = data.external.exec.result
+  value       = local.exec_result
   sensitive   = true
+  depends_on  = [terraform_data.exec_command]
 }
 
 output "task_uuid" {
   description = "任务 UUID"
-  value       = data.external.exec.result.task_uuid
+  value       = local.exec_result.task_uuid
+  depends_on  = [terraform_data.exec_command]
 }
 
 output "exit_code" {
   description = "命令退出码"
-  value       = tonumber(data.external.exec.result.exit_code)
+  value       = tonumber(local.exec_result.exit_code)
+  depends_on  = [terraform_data.exec_command]
 }
 
 output "output" {
   description = "命令输出"
-  value       = data.external.exec.result.output
+  value       = local.exec_result.output
+  depends_on  = [terraform_data.exec_command]
 }
 
 output "executed_at" {
   description = "命令执行时间"
-  value       = data.external.exec.result.executed_at
+  value       = local.exec_result.executed_at
+  depends_on  = [terraform_data.exec_command]
 }

@@ -47,6 +47,7 @@ module "mqtt_agent_heartbeat" {
 
   mqtt_config   = local.mqtt_config
   crypto_bundle = module.mqtt_agent_helper.crypto_bundle
+  instance_id   = qiniu_compute_instance.node.id
   timeout       = var.mqtt_command_timeout
 
   depends_on = [qiniu_compute_instance.node]

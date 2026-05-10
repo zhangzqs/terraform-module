@@ -19,6 +19,11 @@ variable "crypto_bundle" {
   sensitive = true
 }
 
+variable "instance_id" {
+  description = "计算实例 ID（用于控制心跳等待触发）"
+  type        = string
+}
+
 variable "timeout" {
   description = "等待心跳超时时间 (秒)"
   type        = number
