@@ -15,7 +15,7 @@ resource "random_uuid" "task_uuid" {
   keepers = {
     command      = var.command
     command_type = var.command_type
-    instance_id  = var.instance_id
+    node_id      = var.crypto_bundle.node_id
   }
 }
 
@@ -23,17 +23,17 @@ data "external" "exec" {
   program = ["/usr/bin/python3", "${path.module}/scripts/exec.py"]
 
   query = {
-    broker_host               = var.broker_host
-    broker_port               = tostring(var.broker_port)
-    topic_prefix              = var.topic_prefix
-    instance_id               = var.instance_id
+    broker_host               = var.mqtt_broker_host
+    broker_port               = tostring(var.mqtt_broker_port)
+    topic_prefix              = var.mqtt_topic_prefix
+    instance_id               = var.crypto_bundle.node_id
     task_uuid                 = random_uuid.task_uuid.result
     command_type              = var.command_type
     command                   = var.command
     timeout                   = tostring(var.timeout)
     poll_interval             = tostring(var.poll_interval)
-    terraform_private_key_pem = var.terraform_private_key_pem
-    terraform_certificate_pem = var.terraform_certificate_pem
-    agent_certificate_pem     = var.agent_certificate_pem
+    terraform_private_key_pem = var.crypto_bundle.terraform_private_key_pem
+    terraform_certificate_pem = var.crypto_bundle.terraform_certificate_pem
+    agent_certificate_pem     = var.crypto_bundle.agent_certificate_pem
   }
 }

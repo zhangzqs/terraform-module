@@ -1,27 +1,34 @@
-variable "broker_host" {
+variable "mqtt_broker_host" {
   description = "MQTT broker 主机名"
   type        = string
 }
 
-variable "broker_port" {
+variable "mqtt_broker_port" {
   description = "MQTT broker TLS 端口"
   type        = number
 }
 
-variable "topic_prefix" {
+variable "mqtt_topic_prefix" {
   description = "MQTT topic 前缀"
   type        = string
 }
 
-variable "instance_id" {
-  description = "实例 ID"
-  type        = string
+variable "crypto_bundle" {
+  description = "加密材料包（node_id + 4 个证书字段）"
+  type = object({
+    node_id                   = string
+    agent_certificate_pem     = string
+    agent_private_key_pem     = string
+    terraform_certificate_pem = string
+    terraform_private_key_pem = string
+  })
+  sensitive = true
 }
 
 variable "command_type" {
   description = "命令类型"
   type        = string
-  default     = "shell"
+  default     = "shell-script"
 
   validation {
     condition     = contains(["shell", "shell-script"], var.command_type)
@@ -44,20 +51,4 @@ variable "poll_interval" {
   description = "轮询间隔 (秒)"
   type        = number
   default     = 3
-}
-
-variable "terraform_private_key_pem" {
-  description = "Terraform 侧私钥"
-  type        = string
-  sensitive   = true
-}
-
-variable "terraform_certificate_pem" {
-  description = "Terraform 侧证书"
-  type        = string
-}
-
-variable "agent_certificate_pem" {
-  description = "VM 侧证书"
-  type        = string
 }
