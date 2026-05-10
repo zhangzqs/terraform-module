@@ -103,6 +103,28 @@ def _run_command(command_type: str, command: str) -> tuple[int, str]:
     return 1, f"Unknown command type: {command_type}\n"
 
 
+def _get_system_info() -> dict[str, Any]:
+    """Gather system information for heartbeat."""
+    try:
+        import socket
+        hostname = socket.gethostname()
+    except Exception:
+        hostname = "unknown"
+
+    try:
+        with open("/proc/uptime") as f:
+            uptime_seconds = int(float(f.read().split()[0]))
+    except Exception:
+        uptime_seconds = 0
+
+    return {
+        "hostname": hostname,
+        "uptime": uptime_seconds,
+        "agent_version": "1.0",
+        "status": "ready",
+    }
+
+
 def main() -> int:
     broker_host = _env("MQTT_BROKER_HOST")
     broker_port = int(_env("MQTT_BROKER_PORT"))
@@ -119,12 +141,14 @@ def main() -> int:
 
     command_topic = f"{topic_prefix}/{instance_id}/command"
     result_topic = f"{topic_prefix}/{instance_id}/result"
+    heartbeat_topic = f"{topic_prefix}/{instance_id}/heartbeat"
 
     completed, ledger_meta = _load_ledger(ledger_path)
     in_progress: set[str] = set()
     seen_nonces: set[str] = {item.get("nonce", "") for item in ledger_meta.values() if item.get("nonce")}
     lock = threading.Lock()
     executor = ThreadPoolExecutor(max_workers=max_workers)
+    heartbeat_stop = threading.Event()
 
     client = mqtt.Client(
         mqtt.CallbackAPIVersion.VERSION1,
@@ -143,6 +167,32 @@ def main() -> int:
         # retain=True allows exec.py to receive the result even if it connects after the command
         # completes, enabling idempotent re-runs.
         client.publish(result_topic, package_b64, qos=1, retain=True)
+
+    def publish_heartbeat() -> None:
+        """Publish periodic heartbeat message."""
+        payload = {
+            "message_type": "heartbeat",
+            "task_uuid": "",
+            "sent_at": _iso(_now_utc()),
+            "nonce": "",
+            "system_info": _get_system_info(),
+        }
+        package_b64 = pack_message(
+            payload,
+            signer_cert_pem=agent_cert.read_text(encoding="utf-8"),
+            signer_key_pem=agent_key.read_text(encoding="utf-8"),
+            recipient_cert_pem=terraform_cert.read_text(encoding="utf-8"),
+        )
+        client.publish(heartbeat_topic, package_b64, qos=1, retain=True)
+
+    def heartbeat_loop() -> None:
+        """Periodic heartbeat publishing thread."""
+        while not heartbeat_stop.wait(timeout=10):  # publish every 10 seconds
+            try:
+                publish_heartbeat()
+            except Exception:
+                import traceback
+                traceback.print_exc()
 
     def clear_retained_command() -> None:
         """Remove the retained command message so stale commands don't re-trigger after restart."""
@@ -256,12 +306,17 @@ def main() -> int:
     client.connect(broker_host, broker_port, keepalive=60)
     client.loop_start()
 
+    # Start heartbeat thread
+    heartbeat_thread = threading.Thread(target=heartbeat_loop, daemon=True)
+    heartbeat_thread.start()
+
     try:
         while True:
             time.sleep(poll_interval)
     except KeyboardInterrupt:
         return 0
     finally:
+        heartbeat_stop.set()
         client.loop_stop()
         client.disconnect()
         executor.shutdown(wait=False, cancel_futures=True)

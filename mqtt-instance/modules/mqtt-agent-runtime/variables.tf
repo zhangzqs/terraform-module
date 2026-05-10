@@ -1,16 +1,10 @@
-variable "mqtt_broker_host" {
-  description = "MQTT broker 主机名"
-  type        = string
-}
-
-variable "mqtt_broker_port" {
-  description = "MQTT broker TLS 端口"
-  type        = number
-}
-
-variable "mqtt_topic_prefix" {
-  description = "MQTT topic 前缀"
-  type        = string
+variable "mqtt_config" {
+  description = "MQTT broker 配置"
+  type = object({
+    broker_host  = string
+    broker_port  = number
+    topic_prefix = string
+  })
 }
 
 variable "crypto_bundle" {

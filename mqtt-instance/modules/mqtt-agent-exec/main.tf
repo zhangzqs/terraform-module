@@ -23,9 +23,9 @@ data "external" "exec" {
   program = ["/usr/bin/python3", "${path.module}/scripts/exec.py"]
 
   query = {
-    broker_host               = var.mqtt_broker_host
-    broker_port               = tostring(var.mqtt_broker_port)
-    topic_prefix              = var.mqtt_topic_prefix
+    broker_host               = var.mqtt_config.broker_host
+    broker_port               = tostring(var.mqtt_config.broker_port)
+    topic_prefix              = var.mqtt_config.topic_prefix
     instance_id               = var.crypto_bundle.node_id
     task_uuid                 = random_uuid.task_uuid.result
     command_type              = var.command_type

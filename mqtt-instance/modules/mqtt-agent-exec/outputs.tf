@@ -1,3 +1,9 @@
+output "result" {
+  description = "完整执行结果"
+  value       = data.external.exec.result
+  sensitive   = true
+}
+
 output "task_uuid" {
   description = "任务 UUID"
   value       = data.external.exec.result.task_uuid

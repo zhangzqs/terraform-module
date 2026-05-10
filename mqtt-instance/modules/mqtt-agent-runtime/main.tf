@@ -5,9 +5,9 @@ locals {
   rendered = templatefile("${path.module}/templates/user-data.sh", {
     shared_py                 = local.shared_py
     agent_py                  = local.agent_py
-    broker_host               = var.mqtt_broker_host
-    broker_port               = var.mqtt_broker_port
-    topic_prefix              = var.mqtt_topic_prefix
+    broker_host               = var.mqtt_config.broker_host
+    broker_port               = var.mqtt_config.broker_port
+    topic_prefix              = var.mqtt_config.topic_prefix
     instance_id               = var.crypto_bundle.node_id
     poll_interval             = var.poll_interval
     replay_window_seconds     = var.replay_window_seconds
