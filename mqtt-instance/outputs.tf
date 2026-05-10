@@ -26,6 +26,5 @@ output "exec_result" {
 
 output "task_uuid" {
   description = "任务 UUID"
-  value       = try(module.mqtt_agent_exec.result.task_uuid, "")
+  value       = nonsensitive(try(module.mqtt_agent_exec.result.task_uuid, ""))
 }
-
